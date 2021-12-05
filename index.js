@@ -51,14 +51,14 @@ fs.readFile('./users.json', 'utf8', (error, data) => {
 })
 
 async function replaceEmail (phone, email) {
-    const client = new Client(msUserDevelop)
+    const client = new Client(msUserProduction)
     await client.connect()
     const text = `SELECT phone, email FROM public.user where phone='${phone}'`
     const res = await client.query(text)
     const dataUser = res.rows
     dataUser.forEach(data => {
         async function replace (){
-            const client = new Client(msUserDevelop)
+            const client = new Client(msUserProduction)
             await client.connect()
             const textReplace = `UPDATE public.user SET email = REPLACE('${data.email}', '${data.email}', '${email}') where phone='${phone}'`
             const res = await client.query(textReplace)

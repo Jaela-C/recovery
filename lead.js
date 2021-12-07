@@ -24,7 +24,7 @@ const urlMongoDb = 'mongodb+srv://sales_prod:W9Xjd5cPrbZADHP9z6SMFpJ2q3aR8rb3@ms
 //     });
 // })
 
-// Replace LeadPerson users
+// Replace email in LeadPerson users
 
 const fs = require('fs');
 
@@ -33,12 +33,10 @@ fs.readFile('./genericUsers.json', 'utf8', async (error, data) => {
 
     const fn = async (user) => {
         const client = await MongoClient.connect(urlMongoDb);
-
         const lead = await client
         .db("MSSalesVAProd")
         .collection("LeadPerson")
         .findOne({ email: `${user.email}` });
-
         return lead;
     };
 
@@ -51,19 +49,22 @@ fs.readFile('./genericUsers.json', 'utf8', async (error, data) => {
 
     let users = line.users;
 
-    const replaceUsers = async (emailGeneric, emailUser, emailPhone) => {
+    const replaceUsers = async (id, emailUser) => {
         const client = await MongoClient.connect(urlMongoDb);
 
         client
         .db("MSSalesVAProd")
         .collection("LeadPerson")
-        .replaceOne({"email":`${emailGeneric}`}, {"email":`${emailUser}`, "phone":`${emailPhone}`})
-
+        .updateOne({
+            _id: id
+        }, 
+        { $set: { email: emailUser}}
+        )
     };
 
     users = users.map((user, index) => {
-        const currentLead = leads.find((lead) => lead.email === user.email);
-        console.log(currentLead["email"], user.email);
-        //replaceUsers(currentLead["email"].toString(), user.email.toString(), user.phone) --- en revisión
+        const currentLead = leads.find((lead) => lead.phone === user.phone);
+        console.log(currentLead["_id"].toString(), user.email)
+        replaceUsers(currentLead["_id"], user.email) 
     });
 })
